@@ -1,8 +1,18 @@
 import { z } from 'zod';
 import { baseProcedure, createTRPCRouter, protectedProcedure } from '../init';
 import prisma from '@/lib/db';
- 
+import { generateText} from 'ai';
+import { google } from '@ai-sdk/google'
+
 export const appRouter = createTRPCRouter({
+  testAi: protectedProcedure.mutation(async ()=> {
+   const {text} = await generateText({
+    model: google("gemini-2.5-flash"),
+    prompt: "Write a vegetarian lasagna recipe for 4 people"
+   })
+
+   return text;
+  }),
   getWorkflows: protectedProcedure.query(({ctx}) => {
     return prisma.workflow.findMany()
   }),
