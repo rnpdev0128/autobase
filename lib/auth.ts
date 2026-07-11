@@ -1,7 +1,8 @@
-
+import { checkout, polar, portal } from "@polar-sh/better-auth";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import prisma from "@/lib/db";
+import { polarClient } from "./polar";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -20,5 +21,24 @@ export const auth = betterAuth({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
-  }
+  },
+  plugins: [
+    polar({
+      client: polarClient,
+      createCustomerOnSignUp: true,
+      use: [
+        checkout({
+          products: [
+            {
+              productId: "7d10ca19-1d1e-4ae3-9b45-a050607c00ab",
+              slug: "pro",
+            }
+          ],
+          successUrl: process.env.POLAR_SUCCESS_URL,
+          authenticatedUsersOnly: true,
+        }),
+        portal(),
+      ],
+    })
+  ]
 });
